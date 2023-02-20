@@ -36,6 +36,9 @@ int	main(int argc, char **argv, char **envp)
 			continue;
 		if (!check_write_exit(&ms))
 			exit(0);
-		exec_cmd(&ms, envp);
+		if (ms.line)
+		{
+			exec_cmd(&ms, envp);
+		}
 	}
 }
