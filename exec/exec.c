@@ -83,42 +83,31 @@ int count_pipe(t_minishell *ms)
 int	exec_one_pipe(t_minishell *ms, char **envp, char **tmp)
 {
 	int		id;
-	int		i;
 	int		j;
 
-	i = 0;
-	while (tmp[i])
+
+	j = 0;
+	ms->input_cmd = ft_split(tmp[0], ' ');
+	while (ms->input_cmd[j])
 	{
-		j = 0;
-		ms->input_cmd = ft_split(tmp[i], ' ');
-		while (ms->input_cmd[j])
-		{
-			ft_printf("%s\n", ms->input_cmd[j]);
-			j++;
-		}
-		if (!check_command(ms))
-		{
-			ft_free_tab(ms->input_cmd);
-			//free(ms->path_cmd);
-			// ms->prompt = ERR_PROMPT;
-			return (error(CMD_ERR), 0);
-		}
-		id = fork();
-		if (id == 0)
-		{
-			if (execve(ms->path_cmd, ms->input_cmd, envp) == - 1)
-				return (exit(0), 0);
-			exit(0);
-		}
+		ft_printf("%s\n", ms->input_cmd[j]);
+		j++;
+	}
+	if (!check_command(ms))
+	{
 		ft_free_tab(ms->input_cmd);
-		free(ms->path_cmd);
-		i++;
+		return (error(CMD_ERR), 0);
 	}
-	while (i > 0)
+	id = fork();
+	if (id == 0)
 	{
-		wait(NULL);
-		i--;
+		if (execve(ms->path_cmd, ms->input_cmd, envp) == - 1)
+			return (exit(0), 0);
+		exit(0);
 	}
+	ft_free_tab(ms->input_cmd);
+	free(ms->path_cmd);
+	wait(NULL);
 	return (1);
 }
 
@@ -191,13 +180,13 @@ int	exec_cmd(t_minishell *ms, char **envp)
 	if (nb_pipe == 0)
 	{
 		if (!exec_one_pipe(ms, envp, tmp))
-			return (0);
+			return (ft_free_tab(tmp), 0);
 	}
 	else
 	{
 		tmp2 = ft_split(tmp[0], '|');
 		if (!exec_multi_pipe(ms, envp, tmp2, nb_pipe))
-			return (0);
+			return (ft_free_tab(tmp), 0);
 	}
 	ft_free_tab(tmp);
 	return (1);
