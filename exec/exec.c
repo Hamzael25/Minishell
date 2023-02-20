@@ -87,7 +87,7 @@ int	exec_multi_pipe(t_minishell *ms, char **envp, char **tmp2, int nb_pipe)
 			if (dup2(save_stdin, 0) == -1)
 				error ("dup");
 			ft_free_tab(ms->input_cmd);
-			return (error(CMD_ERR), 0);
+			return (close(save_stdin), error(CMD_ERR), 0);
 		}
 		if (pipe(ms->fd) == -1)
 			error("pipe");	
@@ -121,8 +121,9 @@ int	exec_multi_pipe(t_minishell *ms, char **envp, char **tmp2, int nb_pipe)
 		i++;
 		nb_pipe--;
 	}
+	close(save_stdin);
 	ft_free_tab(tmp2);
-	while (i > 0)
+	while (i >= 0)
 	{
 		wait(NULL);
 		i--;
