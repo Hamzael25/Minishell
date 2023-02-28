@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   exec.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ikaismou <ikaismou@student.42.fr>          +#+  +:+       +#+        */
+/*   By: hamzaelouardi <hamzaelouardi@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/18 15:56:55 by ikaismou          #+#    #+#             */
-/*   Updated: 2023/02/19 18:29:13 by ikaismou         ###   ########.fr       */
+/*   Updated: 2023/02/28 03:54:22 by hamzaelouar      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,31 +47,30 @@ int count_pipe(t_minishell *ms)
 	return (pipe);
 }
 
-int	exec_one_pipe(t_minishell *ms, char **envp, char **tmp)
+int	exec_one_pipe(t_minishell *ms, char **envp)
 {
 	int		id;
 
-	ms->input_cmd = ft_split(tmp[0], ' ');
 	if (!check_command(ms))
 	{
-		ft_free_tab(ms->input_cmd);
+		ft_free_tab(ms->parsed);
 		return (error(CMD_ERR), 0);
 	}
 	id = fork();
 	if (id == 0)
 	{
-		if (execve(ms->path_cmd, ms->input_cmd, envp) == - 1)
+		if (execve(ms->path_cmd, ms->parsed, envp) == - 1)
 			error("error exec");
 		exit(0);
 	}
-	ft_free_tab(ms->input_cmd);
+	ft_free_tab(ms->parsed);
 	free(ms->path_cmd);
 	wait(NULL);
 	wait(NULL);
 	return (1);
 }
 
-int	exec_multi_pipe(t_minishell *ms, char **envp, char **tmp2, int nb_pipe)
+int	exec_multi_pipe(t_minishell *ms, char **envp, int nb_pipe)
 {
 	int	id;
 	int	i;
@@ -79,9 +78,9 @@ int	exec_multi_pipe(t_minishell *ms, char **envp, char **tmp2, int nb_pipe)
 
 	save_stdin = dup(0);
 	i = 0;
-	while (tmp2[i])
+	while (ms->parsed[i])
 	{
-		ms->input_cmd = ft_split(tmp2[i], ' ');
+		ms->input_cmd = ft_split(ms->parsed[i], ' ');
 		if (!check_command(ms))
 		{
 			if (dup2(save_stdin, 0) == -1)
@@ -122,7 +121,6 @@ int	exec_multi_pipe(t_minishell *ms, char **envp, char **tmp2, int nb_pipe)
 		nb_pipe--;
 	}
 	close(save_stdin);
-	ft_free_tab(tmp2);
 	while (i >= 0)
 	{
 		wait(NULL);
@@ -133,24 +131,26 @@ int	exec_multi_pipe(t_minishell *ms, char **envp, char **tmp2, int nb_pipe)
 
 int	exec_cmd(t_minishell *ms, char **envp)
 {
-	char	**tmp;
-	char	**tmp2;
 	int		nb_pipe;
 
-	(void)(envp);
-	tmp = ft_split(ms->line, '\n');
 	nb_pipe = count_pipe(ms);
 	if (nb_pipe == 0)
 	{
-		if (!exec_one_pipe(ms, envp, tmp))
-			return (ft_free_tab(tmp), 0);
+		//explications :
+		//ms->input_cmd a ete remplacé par ms->parsed 
+		//et on a plus besoin de faire le split des espaces dans la fonction.
+		if (!exec_one_pipe(ms, envp))
+			return (ft_free_tab(ms->parsed), 0);
 	}
 	else
 	{
-		tmp2 = ft_split(tmp[0], '|');
-		if (!exec_multi_pipe(ms, envp, tmp2, nb_pipe))
-			return (ft_free_tab(tmp2), ft_free_tab(tmp), 0);
+		//explications :
+		//ici on est obligé de split l'espace dans la fonction,
+		//donc on touche a rien ! 
+		//j'ai juste supprimé le tmp = split de '|' car ms->parsed est deja un split de '|'.
+		if (!exec_multi_pipe(ms, envp, nb_pipe))
+			return (ft_free_tab(ms->parsed), 0);
 	}
-	ft_free_tab(tmp);
+	ft_free_tab(ms->parsed);
 	return (1);
 }
