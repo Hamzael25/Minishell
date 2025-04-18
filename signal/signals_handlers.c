@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   signals_handlers.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: hamza <hamza@student.42.fr>                +#+  +:+       +#+        */
+/*   By: hamzaelouardi <hamzaelouardi@student.42    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/17 17:45:36 by hamzaelouar       #+#    #+#             */
-/*   Updated: 2023/05/16 01:07:20 by hamza            ###   ########.fr       */
+/*   Updated: 2025/04/18 22:23:17 by hamzaelouar      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ void	handle_ctrl_c(int signum, siginfo_t *info, void *context)
 	(void)info;
 	(void)context;
 	write(1, "\n", 1);
-	rl_replace_line("", 0);
+	rl_insert_text("");
 	rl_on_new_line();
 	rl_redisplay();
 	g_global.g_status = 128 + signum;
